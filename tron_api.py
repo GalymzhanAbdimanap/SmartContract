@@ -11,7 +11,7 @@ event_server = HttpProvider('https://api.shasta.trongrid.io')
 app = Flask(__name__)
 
 #idet
-#private_key = '64f4340246db4752ce4cdf274834702cd37140ba68a036ee8486a0b370914621'
+
 
 
 tron = Tron(full_node=full_node,
@@ -23,15 +23,13 @@ tron = Tron(full_node=full_node,
 #########################################################################################################################
 #                                                    Start API
 #########################################################################################################################
-private_key = '464d87c77a61a1065e3d21e6e6be9cd3aaeb0ce59724a77c5e86cbeed38bd9b7'
+
 smart_contract_address = '41A498E47E86108C01105DD4397339B459F1FFDFFF'
 default_address = '41FCF23797364C955A23B73F711219FBF5564B2C17'
 
 
 
 def getIndexOfGoods():
-    smart_contract_address = '41A498E47E86108C01105DD4397339B459F1FFDFFF'
-    default_address = '41FCF23797364C955A23B73F711219FBF5564B2C17'
     a = tron.transaction_builder.trigger_smart_contract(contract_address = smart_contract_address,
                                function_selector = 'getIndexAuctions()',
                                fee_limit=1000000000,
