@@ -1,0 +1,88 @@
+
+
+'http://172.16.3.66:8839/getGoods'
+
+    {
+        
+    }
+
+
+'http://172.16.3.66:8839/getChecks'
+
+    {
+        "account_address":"41.."
+    }
+
+
+'http://172.16.3.66:8839/getWallet'
+
+    {
+        "account_address":"41.."
+    }
+
+
+'http://172.16.3.66:8839/purchaseGoods'
+
+    {
+        "account_address":"41..",
+        "privateKey":"",
+        "id_goods":[],
+        "amounts_goods":[],
+        "timestamp":""
+    }
+
+'http://172.16.3.66:8839/confirmGoods'
+
+    {
+        "account_address":"41..",
+        "privateKey":"",
+        "id_goods":[],
+        "id_checks":0
+    }
+
+
+'http://172.16.3.66:8839/saleOfGoods'
+
+    {
+        "account_address":"41..",
+        "privateKey":"",
+        "id_goods":[],
+        "amounts_goods":[],
+    }
+
+'http://172.16.3.66:8839/cancelOfPurchase'
+
+    {
+        "account_address":"41..",
+        "privateKey":"",
+        "id_goods":[],
+        "id_checks":0
+    }
+
+
+'http://172.16.3.66:8839/balanceOfToken'
+
+    {
+        "account_address":"41.."
+    }
+
+
+'http://172.16.3.66:8839/balanceOfTrx'
+
+    {
+        "account_address":"41.."
+    }
+
+
+'http://172.16.3.66:8839/freeze_balance'
+    {
+        "account_address":"41..",
+        "privateKey":"",
+        "amount":0,
+        "resource":"" #BANDWIDTH or ENERGY
+    }
+
+'http://172.16.3.66:8839/create_account'
+    {
+        
+    }
