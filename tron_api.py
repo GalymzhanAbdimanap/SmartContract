@@ -11,7 +11,7 @@ event_server = HttpProvider('https://api.shasta.trongrid.io')
 app = Flask(__name__)
 
 #idet
-
+#private_key = '64f4340246db4752ce4cdf274834702cd37140ba68a036ee8486a0b370914621'
 
 
 tron = Tron(full_node=full_node,
@@ -23,8 +23,9 @@ tron = Tron(full_node=full_node,
 #########################################################################################################################
 #                                                    Start API
 #########################################################################################################################
-
-smart_contract_address = '41A498E47E86108C01105DD4397339B459F1FFDFFF'
+#private_key = '464d87c77a61a1065e3d21e6e6be9cd3aaeb0ce59724a77c5e86cbeed38bd9b7'
+#smart_contract_address = '41A498E47E86108C01105DD4397339B459F1FFDFFF'
+smart_contract_address = '41157290966C5D65633276C184D110E4C1DC96C577'
 default_address = '41FCF23797364C955A23B73F711219FBF5564B2C17'
 
 
@@ -110,8 +111,9 @@ def getChecks():
                                 )
             check = check['constant_result']
             decodeH = decode_hex(check[0])
-            decodeA= decode_abi(('string[]','uint256[]','uint256[]','uint256[]','address[]','uint256','string','bool','uint256','string',),decodeH)
-            res_data = {"nameOfGood":decodeA[0], "amountOfgood":decodeA[1], "price":decodeA[2], "sumPrice":decodeA[3], "addressOfContract":decodeA[4], "timestamp":decodeA[5], "status":decodeA[6], "allSumPrice":decodeA[7], "typeOfOp":decodeA[8]}
+            decodeA= decode_abi(('string[]','uint256[]','uint256[]','uint256[]','address[]','uint256','string','bool','uint256','string','bool',),decodeH)
+            print(decodeA)
+            res_data = {"nameOfGood":decodeA[0], "amountOfgood":decodeA[1], "price":decodeA[2], "sumPrice":decodeA[3], "addressOfContract":decodeA[4], "id_check":decodeA[5] ,"timestamp":decodeA[6], "status":decodeA[7], "allSumPrice":decodeA[8], "typeOfOp":decodeA[9], "isCanceled":decodeA[10]}
             checks.append(res_data)
             #print(decodeA)
     except Exception as e:
@@ -161,11 +163,11 @@ def getWallet():
             #print(decodeA)
     except Exception as e:
         logsOfError = logsOfError + str(e)
-    return jsonify({'wallets': wallets}, 'logs':logsOfError)
+    return jsonify({'wallets': wallets, 'logs':logsOfError})
 
 
 
-@app.route('/buyGoods', methods=["POST"])
+@app.route('/purchaseGoods', methods=["POST"])
 def buyGoods():
     id_goods =[]
     amounts_goods=[]
@@ -195,7 +197,7 @@ def buyGoods():
         e = tron.trx.broadcast(signed1_tx)
     except Exception as e:
         logsOfError = logsOfError + str(e)
-    return jsonify{'txID':e['txid'], 'logs':logsOfError}
+    return jsonify({'txID':e['txid'], 'logs':logsOfError})
 
 @app.route('/confirmGoods', methods=["POST"])
 def confirmGoods():
@@ -223,7 +225,7 @@ def confirmGoods():
         e = tron.trx.broadcast(signed1_tx)
     except Exception as e:
         logsOfError = logsOfError + str(e)
-    return jsonify{'txID':e['txid'], 'logs':logsOfError}
+    return jsonify({'txID':e['txid'], 'logs':logsOfError})
 
 
 @app.route('/saleOfGoods', methods=["POST"])
@@ -236,14 +238,15 @@ def saleOfGoods():
     account_address =  data['account_address']
     private_key =  data['privateKey']
     id_goods = data['id_goods']
-    amounts = data['amounts']
+    amounts = data['amounts_goods']
+    timestamp = data['timestamp']
     
     try:
         trigger = tron.transaction_builder.trigger_smart_contract(contract_address = smart_contract_address,
-                                function_selector = 'saleOfGoodsBox(uint256[],uint256[])', #без пробелов!
+                                function_selector = 'saleOfGoodsBox(uint256[],uint256[],string)', #без пробелов!
                                 fee_limit=1000000000,
                                 call_value=0,
-                                parameters=[{'type':'int256[]','value':amounts},{'type': 'int256[]','value':id_goods}],
+                                parameters=[{'type':'int256[]','value':amounts},{'type': 'int256[]','value':id_goods},{'type': 'string','value':timestamp}],
                                 issuer_address=account_address
                                 )
 
@@ -253,7 +256,45 @@ def saleOfGoods():
         e = tron.trx.broadcast(signed1_tx)
     except Exception as e:
         logsOfError = logsOfError +str(e)
-    return jsonify{'txID':e['txid'], 'logs': logsOfError}
+    return jsonify({'txID':e['txid'], 'logs': logsOfError})
+
+
+
+
+
+@app.route('/cancelOfPurchase', methods=["POST"])
+def cancelOfPurchase():
+    id_goods=[]
+    logsOfError=''
+
+    data = request.get_json(force=True)
+    account_address =  data['account_address']
+    private_key =  data['privateKey']
+    id_goods = data['id_goods']
+    id_check = data['id_check']
+    
+    try:
+        trigger = tron.transaction_builder.trigger_smart_contract(contract_address = smart_contract_address,
+                                function_selector = 'cancelConfirmBox(uint256[],uint256)', #без пробелов!
+                                fee_limit=1000000000,
+                                call_value=0,
+                                parameters=[{'type':'int256[]','value':id_goods},{'type': 'int256','value':id_check}],
+                                issuer_address=account_address
+                                )
+
+        tron.private_key = private_key
+        transaction = trigger['transaction']
+        signed1_tx = tron.trx.sign(transaction,True,False)
+        e = tron.trx.broadcast(signed1_tx)
+    except Exception as e:
+        logsOfError = logsOfError + str(e)
+    return jsonify({'txID':e['txid'], 'logs':logsOfError})
+
+
+
+
+
+
 
 @app.route('/balanceOfToken', methods=["POST"])
 def balanceOfToken():
@@ -293,6 +334,60 @@ def balanceOfTrx():
 
 
 
+@app.route('/freeze_balance', methods=["POST"])
+def freeze_balance():
+    logsOfError=''
+    data = request.get_json(force=True)
+    account_address =  data['account_address']
+    private_key = data['privateKey']
+    amount = data['amount']
+    resource = data['resource'] #bandwith or energy
+
+
+    try:
+        tron.private_key = private_key
+        freeze_balance = tron.trx.freeze_balance(amount = amount, resource=resource, account = account_address)
+        print(freeze_balance)
+    except Exception as e:
+        logsOfError = logsOfError+str(e)
+    return jsonify({'txid':str(freeze_balance['txid']), 'logs':logsOfError})
+
+
+
+
+@app.route('/unfreeze_balance', methods=["POST"])
+def unfreeze_balance():
+    logsOfError=''
+    data = request.get_json(force=True)
+    account_address =  data['account_address']
+    private_key = data['privateKey']
+    resource = data['resource'] #bandwith or energy
+
+
+    try:
+        tron.private_key = private_key
+        unfreeze_balance = tron.trx.unfreeze_balance(resource=resource, account = account_address)
+        print(unfreeze_balance)
+    except Exception as e:
+        logsOfError = logsOfError+str(e)
+    return jsonify({'unfreeze_balance':str(unfreeze_balance), 'logs':logsOfError})
+
+
+
+
+@app.route('/create_account', methods=["POST"])
+def create_account():
+    logsOfError=''
+
+    try:
+        
+        account = tron.create_account
+        print(account)
+    except Exception as e:
+        logsOfError = logsOfError+str(e)
+    return jsonify({'publicKey':str(account.public_key), 'base58':str(account.address.base58), 'hex':str( account.address.hex), 'privateKey':str(account.private_key), 'logs':logsOfError})
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8839, threaded=True)
+    #app.run(host='178.88.112.200', port=8839, threaded=True)
