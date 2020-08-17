@@ -1,3 +1,7 @@
+// Market place (smart contract) on Tron blockchain platform.
+// Copyright (c) 2020 IDET.kz
+// Written by Galymzhan Abdimanap.
+
 pragma solidity 0.5.9;
 pragma experimental ABIEncoderV2;
 //import "https://github.com/OpenZeppelin/openzeppelin-solidity/contracts/math/SafeMath.sol";
