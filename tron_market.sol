@@ -8,10 +8,10 @@ import "Token-contract.sol";
 
 
 contract AuctionBox{
-    
-    //Auction[] public auctions;
+    // Market place. Main contract. 
+    // Functions: purchase, confirm purchase, sale of good, generate checks, good's wallet and etc. 
     using SafeMath for uint256;
-    //Auction a;
+    // Object of token contract.
     TRC20 trc20;
     
     
@@ -21,14 +21,17 @@ contract AuctionBox{
     bool isExist;
     uint _index=0;
     
+    // Address of token contract.
     uint256 add_token = 0x411576d1a39ace4f0a24fc52b7a17be97904f6a2b8;
+    // State of good.
     enum State{Default, Running, Finalized}
     State public auctionState;
     
     
     
     
-    //contract Auctions
+    // contract Auctions
+    // 
     uint public count;
     address owner = msg.sender;
     uint _index_auctions=0;
@@ -36,23 +39,14 @@ contract AuctionBox{
     string description;
     uint commission;
     uint constPrice;
-    uint commisionConst;
-    
-    //uint _index=0;
-    //bool isExist;
-    
+    uint commisionConst;  
     uint public highestPrice;
     address payable public highestBidder;
+    
     mapping(uint=>mapping(address => mapping(uint=>uint))) public bids;
     mapping(uint=>mapping(address => mapping(uint=>uint))) public bids_goods;
     mapping(uint=>mapping(address => uint)) public goods;
     mapping(uint=>State) public aucStates;
-    
-    
-    
-    
-    
-    
     
     
     function convertFromTronInt(uint256 tronAddress) public view returns(address){
@@ -97,15 +91,9 @@ contract AuctionBox{
         
     }
     mapping(uint=>Auctions) AllAuctions;
-    
-    
-    
     mapping(address=>mapping(uint=>WalletOfGood)) walletOfGoods;
-    
-    
     uint[] confirmGivenArray;
     mapping(address=>mapping(uint=>ChecksOfGood)) checksOfGood;
-    
     mapping(address=>uint[]) addressOfGoods;
     mapping(address=>uint[]) indexesOfChecks;
     
@@ -113,8 +101,7 @@ contract AuctionBox{
    
     //_address_receipt = address of account
     function setChecksOfGoods(address _address_receipt, uint _index, string memory _nameOfgood, uint _amountOfGood,  uint _Price, uint _sumPrice, address  _address_transaction, string memory _timestamp, bool _status, string memory _type_op, bool _isCanceled) public{
-        
-        
+        // Generate check's of purchase.
         checksOfGood[_address_receipt][_index].nameOfGood.push(_nameOfgood);
         checksOfGood[_address_receipt][_index].amountOfGood.push(_amountOfGood);
         checksOfGood[_address_receipt][_index].Price.push(_Price);
@@ -124,37 +111,31 @@ contract AuctionBox{
         checksOfGood[_address_receipt][_index].status = _status;
         checksOfGood[_address_receipt][_index].allSumPrice = checksOfGood[_address_receipt][_index].allSumPrice.add(_sumPrice);
         checksOfGood[_address_receipt][_index].type_op = _type_op;
-        checksOfGood[_address_receipt][_index].isCanceled = _isCanceled;
-        //goodChecks.push(_address_receipt);
-        
-        
+        checksOfGood[_address_receipt][_index].isCanceled = _isCanceled; 
     }
+    
     //_address_receipt = address of account
     function getChecksOfGoods(address _address_receipt, uint _index) view public returns (string [] memory, uint[] memory, uint[] memory, uint[] memory, address[] memory, uint, string memory, bool, uint, string memory, bool){
+        // Return checks of user.
         address _a = _address_receipt;
         uint _i = _index;
-        
-        return (checksOfGood[_a][_i].nameOfGood, checksOfGood[_a][_i].amountOfGood, checksOfGood[_a][_i].Price, checksOfGood[_a][_i].sumPrice, checksOfGood[_a][_i].address_transaction, _i, checksOfGood[_a][_i].timestamp, checksOfGood[_a][_i].status, checksOfGood[_a][_i].allSumPrice, checksOfGood[_a][_i].type_op, checksOfGood[_a][_i].isCanceled);
-        ///////
-        
+        return (checksOfGood[_a][_i].nameOfGood, checksOfGood[_a][_i].amountOfGood, checksOfGood[_a][_i].Price, checksOfGood[_a][_i].sumPrice, checksOfGood[_a][_i].address_transaction, _i, checksOfGood[_a][_i].timestamp, checksOfGood[_a][_i].status, checksOfGood[_a][_i].allSumPrice, checksOfGood[_a][_i].type_op, checksOfGood[_a][_i].isCanceled);   
     }
     
    
     //_address = address of account
     function settWalletOfGoods(address _address, uint _id_auction, string memory _nameOfgood, uint _amountOfgood, uint _price, uint _commission) public{
-        
-        //user = walletOfGoods[_address];
+        // Add goods in wallet.
         walletOfGoods[_address][_id_auction].nameOfgood = _nameOfgood;
         walletOfGoods[_address][_id_auction].price = _price;
         walletOfGoods[_address][_id_auction].amountOfgood += _amountOfgood;
         walletOfGoods[_address][_id_auction].addressOfgood = _id_auction;
         walletOfGoods[_address][_id_auction].commission = _commission;
-        
-        
-        //userAccts.push(_address) -1;
     }
+    
     //_address = address of account
     function setNameOfGoodFromWallet(address _address, uint _id_auction) public{
+        // Return names of good from user's wallet.
         isExist=false;
         for(uint i=0; i<addressOfGoods[_address].length; i++){
             
@@ -167,44 +148,43 @@ contract AuctionBox{
              
         }
     }
+    
     //_address = address of account
     function setIndexOfChecks(address _address, uint _index)public{
+        // Add ID of user's check in db.
         indexesOfChecks[_address].push(_index);
     }
-    
-    
-    
+
     function setIsConfirmGiven(address _address, uint _index) public{
+        // Change status of purchase on success.
         checksOfGood[_address][_index].status = true;
     }
     
     function setIsCancelOfPurchase(address _address, uint _index) public{
+        // Change status of purchase on failed.
         checksOfGood[_address][_index].isCanceled = true;
     }
     
-    
-    
     //_address = address of account
     function getAddressOfGoodFromWallet(address _address) view public returns (uint[] memory){
+        // Return ids of users from wallet.
         return (addressOfGoods[_address]);
     }
     
-    
     //_address = address of account
     function getIndexOfChecksAndIsConfirm(address _address) view public returns(uint[] memory){
+        // Return ids of user's checks.
         return indexesOfChecks[_address];
     }
     
     
     function getWalletOfGood_array(address _address, uint _id_auction) view public returns (string memory, uint,uint, uint, uint){
-        return (walletOfGoods[_address][_id_auction].nameOfgood, walletOfGoods[_address][_id_auction].amountOfgood,walletOfGoods[_address][_id_auction].price, walletOfGoods[_address][_id_auction].addressOfgood, walletOfGoods[_address][_id_auction].commission);
-        
+        // Return info about goods from user's wallet.
+        return (walletOfGoods[_address][_id_auction].nameOfgood, walletOfGoods[_address][_id_auction].amountOfgood,walletOfGoods[_address][_id_auction].price, walletOfGoods[_address][_id_auction].addressOfgood, walletOfGoods[_address][_id_auction].commission);   
     }
-    
-    
 
-   
    function saleOfGoods(uint _id_auction, uint _amountOfgood, uint id, string memory tmstp) public{
+       // Sale users's goods.
        require(_amountOfgood<=walletOfGoods[msg.sender][_id_auction].amountOfgood);
        
         string memory ttl = returnTitleAuctions(_id_auction);
@@ -214,20 +194,19 @@ contract AuctionBox{
         uint cnstPrc;
         cnstPrc = strtPrc;
         uint id_a = _id_auction; 
-       
+       // Connect with token contract.
        trc20 = TRC20(address(0x411576d1a39ace4f0a24fc52b7a17be97904f6a2b8));
-       //a = Auction(address(_addresOfgood));
+       // Add amount of goods from sale on market place.
        setCountAdd(_id_auction, _amountOfgood);
+       // Delete saled amount of goods from users's wallet.
        walletOfGoods[msg.sender][_id_auction].amountOfgood = walletOfGoods[msg.sender][_id_auction].amountOfgood.sub(_amountOfgood);
-       
-       
+       // Get tokens from sale with including commission
        strtPrc = walletOfGoods[msg.sender][id_a].price.mul(100000000).mul(_amountOfgood).sub(walletOfGoods[msg.sender][id_a].commission.mul(1000000).mul(_amountOfgood));
        trc20.approve(address(this), msg.sender, strtPrc);
        // Move to tokens to contract address
        trc20.transfer(msg.sender,strtPrc);
-       
        setChecksOfGoods(msg.sender, id, ttl, _amountOfgood, cnstPrc, strtPrc.div(100000000), address(this), tmstp, true, "sale", false);
-       
+       //
        if(walletOfGoods[msg.sender][_id_auction].amountOfgood==0){
            for(uint i=0; i<addressOfGoods[msg.sender].length; i++){
             if(addressOfGoods[msg.sender][i]==_id_auction){
@@ -240,6 +219,7 @@ contract AuctionBox{
    
    //_addresses = address Of goods
    function saleOfGoodsBox(uint[] memory _amountOfgoods, uint[] memory _id_auctions, string memory _timestamp)public {
+       // Accept multi sale.
        _index = addIndex();
        
        for(uint i=0; i<_id_auctions.length; i++){
@@ -248,9 +228,9 @@ contract AuctionBox{
        }
        setIndexOfChecks(msg.sender, _index);
    }
-   
-   
+  
    function placeBidBox(uint[] memory _id_auctions, uint[] memory _amounts, string memory _timestamp)public{
+       // Accept multi purchase.
        _index = addIndex();
        
        for(uint i=0; i<_id_auctions.length; i++){
@@ -261,40 +241,37 @@ contract AuctionBox{
        setIndexOfChecks(msg.sender, _index);
 
    }
+   
    function finalizeBox(uint[] memory _id_auctions, uint _index)public{
+       // Confirm purchase.
         for(uint i=0; i<_id_auctions.length; i++){
             //a = Auction(address(_addresses[i]));
             finalizeAuction(_id_auctions[i], msg.sender, _index);
    }
    }
+   
    //addresses = addresses auction
    function cancelConfirmBox(uint[] memory _id_auctions, uint  _index)public{
+       // Accept multi confirm.
        for(uint i=0; i<_id_auctions.length; i++){
-
             cancelConfirm(_id_auctions[i],msg.sender, _index);
        }
-       
-   
    }
    
-   
-   
    function balanceOf(address account)  external view returns(uint256){
-        
+        // Return balance of user in token contract.
         uint256 balance = trc20.balanceOf(account);
         return balance;
     }
     
     function addIndex() public returns(uint){
+        // Add index of checks.
         return _index+=1;
     }
    
-   
-     
-   
-    
     
     function createAuction(
+        // Create good for market place.
         string memory _title,
         uint _startPrice,
         string memory _description,
@@ -311,11 +288,10 @@ contract AuctionBox{
             
         }
     function returnContentsAuctions(uint _index_auctions)public view returns(uint, string memory, uint, string memory, uint, uint){
+        // Return content of good.
         return (_index_auctions, AllAuctions[_index_auctions].title, AllAuctions[_index_auctions].startPrice, AllAuctions[_index_auctions].description, AllAuctions[_index_auctions].count, AllAuctions[_index_auctions].commission);
-        
     }
-    
-    
+        
     function returnTitleAuctions(uint _index_auctions)public view returns(string memory){
         return AllAuctions[_index_auctions].title;
         
@@ -329,43 +305,29 @@ contract AuctionBox{
         
     }
     function returnCommissionAuctions(uint _index_auctions)public view returns(uint){
-        return AllAuctions[_index_auctions].commission;
-        
+        return AllAuctions[_index_auctions].commission;  
     }
-    
-    
-    
-    
+  
     function getIndexAuctions()public view returns(uint){
         return _index_auctions;
     }
-        
-    
-    
-    
+
     modifier notOwner(){
         require(msg.sender != owner);
         _;
     }
-    
-    
-    
+
     function setCountAdd(uint _id_auc, uint _count) public {
-        AllAuctions[_id_auc].count = AllAuctions[_id_auc].count.add(_count);
-        
+        AllAuctions[_id_auc].count = AllAuctions[_id_auc].count.add(_count);   
     }
     
     function setCountSub(uint _id_auc, uint _count) public {
-        AllAuctions[_id_auc].count = AllAuctions[_id_auc].count.sub(_count);
-        
+        AllAuctions[_id_auc].count = AllAuctions[_id_auc].count.sub(_count);   
     }
-    
-    
-    
-    
+
     // buy goods
     function placeBid(uint _id_auctions, uint amt, address addr, string memory tmstp, uint id)  public notOwner returns(bool) {
-        
+        // Accept buy goods.
         string memory ttl = returnTitleAuctions(_id_auctions);
         uint strtPrc = returnStrtPrcAuctions(_id_auctions);
         uint cnt = returnCountAuctions(_id_auctions);
@@ -406,8 +368,9 @@ contract AuctionBox{
         return true;
 }
 
-    //confirm given good
+    
      function finalizeAuction(uint _id_auctions, address _address, uint _index) payable public{
+        //confirm given good
         string memory ttl = returnTitleAuctions(_id_auctions);
         uint strtPrc = returnStrtPrcAuctions(_id_auctions);
         uint cnt = returnCountAuctions(_id_auctions);
