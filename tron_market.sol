@@ -78,7 +78,7 @@ contract AuctionBox{
         uint[]     amountOfGood; 
         uint[]     Price  ;
         uint[]     sumPrice;
-        address[]  address_transaction;
+        uint[]  id_auction;
         string   timestamp;
         bool     status;
         uint allSumPrice;
@@ -104,26 +104,31 @@ contract AuctionBox{
      
    
     //_address_receipt = address of account
-    function setChecksOfGoods(address _address_receipt, uint _index, string memory _nameOfgood, uint _amountOfGood,  uint _Price, uint _sumPrice, address  _address_transaction, string memory _timestamp, bool _status, string memory _type_op, bool _isCanceled) public{
-        // Generate check's of purchase.
+    function setChecksOfGoods(address _address_receipt, uint _index, string memory _nameOfgood, uint _amountOfGood,  uint _Price, uint _sumPrice, uint  _id_auction, string memory _timestamp, bool _status, string memory _type_op, bool _isCanceled) public{
+        
+        
         checksOfGood[_address_receipt][_index].nameOfGood.push(_nameOfgood);
         checksOfGood[_address_receipt][_index].amountOfGood.push(_amountOfGood);
         checksOfGood[_address_receipt][_index].Price.push(_Price);
         checksOfGood[_address_receipt][_index].sumPrice.push(_sumPrice);
-        checksOfGood[_address_receipt][_index].address_transaction.push(_address_transaction);
+        checksOfGood[_address_receipt][_index].id_auction.push(_id_auction);
         checksOfGood[_address_receipt][_index].timestamp = _timestamp;
         checksOfGood[_address_receipt][_index].status = _status;
         checksOfGood[_address_receipt][_index].allSumPrice = checksOfGood[_address_receipt][_index].allSumPrice.add(_sumPrice);
         checksOfGood[_address_receipt][_index].type_op = _type_op;
-        checksOfGood[_address_receipt][_index].isCanceled = _isCanceled; 
+        checksOfGood[_address_receipt][_index].isCanceled = _isCanceled;
+        //goodChecks.push(_address_receipt);
+        
+        
     }
-    
     //_address_receipt = address of account
-    function getChecksOfGoods(address _address_receipt, uint _index) view public returns (string [] memory, uint[] memory, uint[] memory, uint[] memory, address[] memory, uint, string memory, bool, uint, string memory, bool){
-        // Return checks of user.
+    function getChecksOfGoods(address _address_receipt, uint _index) view public returns (string [] memory, uint[] memory, uint[] memory, uint[] memory, uint[] memory, uint, string memory, bool, uint, string memory, bool){
         address _a = _address_receipt;
         uint _i = _index;
-        return (checksOfGood[_a][_i].nameOfGood, checksOfGood[_a][_i].amountOfGood, checksOfGood[_a][_i].Price, checksOfGood[_a][_i].sumPrice, checksOfGood[_a][_i].address_transaction, _i, checksOfGood[_a][_i].timestamp, checksOfGood[_a][_i].status, checksOfGood[_a][_i].allSumPrice, checksOfGood[_a][_i].type_op, checksOfGood[_a][_i].isCanceled);   
+        
+        return (checksOfGood[_a][_i].nameOfGood, checksOfGood[_a][_i].amountOfGood, checksOfGood[_a][_i].Price, checksOfGood[_a][_i].sumPrice, checksOfGood[_a][_i].id_auction, _i, checksOfGood[_a][_i].timestamp, checksOfGood[_a][_i].status, checksOfGood[_a][_i].allSumPrice, checksOfGood[_a][_i].type_op, checksOfGood[_a][_i].isCanceled);
+        ///////
+        
     }
     
    
