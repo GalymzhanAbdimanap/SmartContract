@@ -5,8 +5,8 @@
 pragma solidity 0.5.9;
 pragma experimental ABIEncoderV2;
 //import "https://github.com/OpenZeppelin/openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "safeMath.sol";
-import "Token-contract.sol";
+import "SafeMath.sol";
+import "Token_contract.sol";
 
 
 
@@ -214,7 +214,7 @@ contract AuctionBox{
        trc20.approve(address(this), msg.sender, strtPrc);
        // Move to tokens to contract address
        trc20.transfer(msg.sender,strtPrc);
-       setChecksOfGoods(msg.sender, id, ttl, _amountOfgood, cnstPrc, strtPrc.div(100000000), address(this), tmstp, true, "sale", false);
+       setChecksOfGoods(msg.sender, id, ttl, _amountOfgood, cnstPrc, strtPrc.div(100000000), id_a, tmstp, true, "sale", false);
        //
        if(walletOfGoods[msg.sender][_id_auction].amountOfgood==0){
            for(uint i=0; i<addressOfGoods[msg.sender].length; i++){
@@ -343,21 +343,23 @@ contract AuctionBox{
         uint commission = returnCommissionAuctions(_id_auctions);
         uint cnstPrc;
         cnstPrc = strtPrc;
+        uint id_a = _id_auctions;
+        string memory time = tmstp;
         
         
-        require(aucStates[_id_auctions] == State.Running);
+        require(aucStates[id_a] == State.Running);
         require(cnt>=amt);
        
               
-        goods[_id_auctions][addr] = goods[_id_auctions][addr].add(amt);
+        goods[id_a][addr] = goods[id_a][addr].add(amt);
         
         strtPrc = strtPrc.mul(100000000).mul(amt).add(commission.mul(1000000).mul(strtPrc).mul(amt));
         
         //strtPrc = strtPrc.mul(amt).add(commission.mul(cnstPrc).div(100).mul(amt));
         
-        bids[_id_auctions][addr][id] = bids[_id_auctions][addr][id].add(strtPrc);
+        bids[id_a][addr][id] = bids[id_a][addr][id].add(strtPrc);
         
-        bids_goods[_id_auctions][addr][id] = bids_goods[_id_auctions][addr][id].add(amt);
+        bids_goods[id_a][addr][id] = bids_goods[id_a][addr][id].add(amt);
         
         trc20.approve(addr, address(this), strtPrc);
         
@@ -366,7 +368,7 @@ contract AuctionBox{
         
         setCountSub(_id_auctions, amt);
 
-        setChecksOfGoods(addr, id, ttl, amt, cnstPrc, strtPrc.div(100000000), address(this), tmstp, false, "purchase", false);
+        setChecksOfGoods(addr, id, ttl, amt, cnstPrc, strtPrc.div(100000000), id_a, time, false, "purchase", false);
         
         //setChecksOfGoods(addr, id, ttl, amt, cnstPrc, strtPrc, address(this), tmstp, false, "purchase");
         
@@ -455,7 +457,6 @@ contract AuctionBox{
     
     
 }
-
 
 
 
